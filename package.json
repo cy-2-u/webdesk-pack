@@ -1,5 +1,6 @@
 {
   "name": "webdesk-pack",
+  "version": "1.0.0",
   "description": "Turn any webpage into a desktop app with Electron. 利用 Electron 快速构建轻量级多端桌面应用。",
   "private": true,
   "repository": {
