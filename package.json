@@ -1,0 +1,37 @@
+{
+  "name": "webdesk-pack",
+  "description": "Turn any webpage into a desktop app with Electron. 利用 Electron 快速构建轻量级多端桌面应用。",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pigjs/webdesk-pack.git"
+  },
+  "author": {
+    "name": "MrYeXiaoqiu",
+    "email": "2019873029@qq.com"
+  },
+  "keywords": [
+    "webdesk",
+    "webdesk-pack",
+    "electron",
+    "desktop app",
+    "web to desktop app",
+    "macOS app", 
+    "Windows app", 
+    "website packaging"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build:mac": "electron-builder -m --config ./electron-builder.config.js",
+    "build:win": "electron-builder -w --config ./electron-builder.config.js",
+    "build": "electron-builder -w -m --config ./electron-builder.config.js",
+    "build:after": "node ./scripts/buildAfter.js",
+    "build:before": "node ./scripts/buildBefore.js"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
+    "sharp": "^0.33.5"
+  }
+}

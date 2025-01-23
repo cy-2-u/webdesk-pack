@@ -1,0 +1,78 @@
+name: webdesk-pack-win
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "[name]"
+        required: true
+      url:
+        description: "[url]"
+        required: true
+      logo:
+        description: "[logo base64]"
+        required: true
+      ghToken:
+        description: "[github token]"
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      GH_TOKEN: ${{ github.event.inputs.ghToken }}
+
+    steps:
+      - name: checkout-main
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+          key: ${{ runner.os }}-node-${{ hashFiles('**/*.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: install-nodejs
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.10.0"
+
+      - name: npm install
+        run: |
+          npm install
+
+      - name: set env
+        run: |
+          echo '{
+            "name": "${{inputs.name}}",
+            "url": "${{inputs.url}}"
+          }' > main/env.json
+
+      - name: Decode Base64 logo and save
+        run: |
+          echo '${{ inputs.logo }}' > resource/icon.txt
+
+      - name: build before
+        run: |
+          npm run build:before
+
+      - name: build
+        run: |
+          npm run build:win
+
+      - name: build after
+        run: |
+          npm run build:after
+
+      - name: Upload release.zip as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: release/release.zip
