@@ -25,12 +25,12 @@ jobs:
 
     steps:
       - name: checkout-main
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: main
 
       - name: Cache Node.js dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.npm
@@ -40,7 +40,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: install-nodejs
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: "20.10.0"
 
@@ -72,7 +72,7 @@ jobs:
           npm run build:after
 
       - name: Upload release.zip as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release
           path: release/release.zip
