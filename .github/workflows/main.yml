@@ -1,0 +1,47 @@
+name: Package Website into EXE
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Enter the website URL to package'
+        required: true
+        type: string
+      exe_name:
+        description: 'Enter the name for the EXE file'
+        required: true
+        type: string
+      icon_path:
+        description: 'Path to the application icon file'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: |
+          npm install -g pkg
+
+      - name: Generate EXE from URL
+        run: |
+          # Create a simple HTML file with the provided URL
+          echo "<html><head><meta http-equiv='refresh' content='0;url=${{ github.event.inputs.url }}'></head><body></body></html>" > website.html
+          
+          # Use pkg to create an EXE file
+          pkg website.html --output ${{ github.event.inputs.exe_name }}.exe --icon ${{ github.event.inputs.icon_path }}
+        
+      - name: Upload EXE as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: website-exe
+          path: ${{ github.event.inputs.exe_name }}.exe
