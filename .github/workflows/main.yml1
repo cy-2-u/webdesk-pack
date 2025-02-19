@@ -1,0 +1,71 @@
+name: Website to EXE
+
+on:
+  workflow_dispatch:
+    inputs:
+      website_url:
+        description: 'Enter the website URL'
+        required: true
+      exe_name:
+        description: 'Enter the name for the EXE file'
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pywebview requests pillow
+
+      - name: Download website icon (China-compatible)
+        run: |
+          $url = "${{ github.event.inputs.website_url }}"
+          $exe_name = "${{ github.event.inputs.exe_name }}"
+          $domain = ($url -replace "https?://([^/]+).*", '$1')
+
+          # 先尝试从网站直接获取 favicon
+          $icon_url1 = "https://$domain/favicon.ico"
+          $icon_url2 = "https://ico.yandex.net/favicon/$domain"
+
+          try {
+            Invoke-WebRequest -Uri $icon_url1 -OutFile "favicon.ico"
+            Write-Output "Using site's own favicon"
+          } catch {
+            try {
+              Invoke-WebRequest -Uri $icon_url2 -OutFile "favicon.ico"
+              Write-Output "Using Yandex favicon"
+            } catch {
+              Write-Output "No favicon found, using default icon"
+            }
+          }
+        shell: pwsh
+
+      - name: Create Python script
+        run: |
+          $python_script = @"
+          import webview
+          webview.create_window('Website Viewer', '${{ github.event.inputs.website_url }}')
+          webview.start()
+          "@
+          Set-Content -Path "app.py" -Value $python_script
+        shell: pwsh
+
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile --windowed --icon=favicon.ico --name="${{ github.event.inputs.exe_name }}" app.py
+
+      - name: Upload EXE as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.inputs.exe_name }}
+          path: dist/${{ github.event.inputs.exe_name }}.exe
